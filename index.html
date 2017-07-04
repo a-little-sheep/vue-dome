@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Vue 测试实例</title>
+    <link rel="stylesheet" href="./bootstrap.min.css">
+    <script src="./vue.js"></script>
+</head>
+<body>
+<div class="container" style="margin-top:200px;" id="app">
+    <div class="row">
+        <div class="col-sm-4">
+            <!--<form >-->
+            <div class="form-group">
+                <label>书籍名称</label>
+                <input type="text" class="form-control" placeholder="请输入" v-model="onebook.name">
+            </div>
+            <div class="form-group">
+                <label>数量</label>
+                <input type="text" class="form-control" placeholder="请输入" v-model="onebook.number">
+            </div>
+            <div class="form-group">
+                <label>价格</label>
+                <input type="text" class="form-control" placeholder="请输入" v-model="onebook.price">
+            </div>
+            <div class="text-center">
+                <button class="btn btn-sm btn-primary" v-if="showaddBtn" v-on:click="addBook">添加书籍</button>
+                <button class="btn btn-sm btn-info" v-else v-on:click="modifyBook">编辑书籍</button>
+            </div>
+            <!--</form>-->
+        </div>
+        <div class="col-sm-7 col-sm-offset-1">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>书籍名称</th>
+                    <th>数量</th>
+                    <th>价格</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <thead v-for="(book,key) in message">
+                <tr>
+                    <td>{{key+1}}</td>
+                    <td>{{book.name}}</td>
+                    <td>{{book.number}}</td>
+                    <td>{{book.money}}</td>
+                    <td>
+                        <button class="btn btn-xs btn-warning" v-on:click="editBook(key)">修改</button>
+                        <button class="btn btn-xs btn-danger" v-on:click="delBook(key)">删除</button>
+                    </td>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            message:[],
+            onebook:{id:0},
+            showaddBtn:true
+        },
+        methods:{
+            addBook:function () {
+                this.onebook.id++;
+                this.onebook.money = this.onebook.number * this.onebook.price;
+                this.message.push(JSON.parse(JSON.stringify(this.onebook))); //这里必须要实现深拷贝
+                this.onebook={id:this.onebook.id};
+                console.log(this.message);
+            },
+            delBook:function (key) {
+                this.message.splice(key,1);
+            },
+            editBook:function (key) {
+                this.onebook = JSON.parse(JSON.stringify(this.message[key]));
+                this.showaddBtn = false;
+            },
+            modifyBook:function(){
+                $this = this;
+                this.message.forEach(function (v,k) {
+                    if(v.id == $this.onebook.id){
+                        $this.message[k] = JSON.parse(JSON.stringify($this.onebook));
+                        $this.onebook={id:$this.onebook.id};
+                        $this.showaddBtn = true;
+                    }
+                });
+            }
+        }
+    });
+</script>
+</body>
+</html>
