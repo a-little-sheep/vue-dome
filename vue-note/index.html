@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="./node_modules/vue/dist/vue.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        {{msg}}
+    </div>
+</body>
+<script>
+    /**
+     * 在vue1。0和2。0相比较：
+     * 2。0去除遍历中的trank-by ，和 v-for 中的（key value）的位置
+     * 2。0 是 （val key）
+     * vue-reseource 是vue请求数据的插件 包括 this.$http.post,this.$http.get
+     * vue的生命周期：
+     * vuei1.0的生命周期： init(初始化),created(初始化完成),beforeCompile(编译前),compiled(编译后)
+     * ,ready(准备好了){页面首次加载获取数据之前，在ready 方法后获取数据},beforeDestroy(销毁前) destroyed(销毁后)
+     * vue2.0生命周期:beforeCreate(初始化之前) created(初始化完成)  beforeMount(挂载前) mounted(挂载完成)
+     *      beforeUpdate(修改之前) updated(修改后) beforeDestroy(销毁前) destroyed(销毁后)
+     * 如果没有 el 元素就不会执行编译
+     * vm.$destroy(); //强制让实例销毁，但是编译好的数据是不会销毁的
+     * vm.$mount("#app");//是手动挂载绑定范围，相当于el:'#app';
+     * v-clock当数据加载后会将此指令移除掉 在style样式标签中添加属性选择器 [v-clock]{display:none;}
+     * 计算属性:在
+     *     computed:{
+     *          total{
+     *              get:function(){},
+     *              set:function(){}
+     *          }
+     *      }
+     *  获取当前元素: vm.$el
+     *  获取当前实例上挂载的数据  vm.$data
+     *  获取自定义属性: vm.$options
+     *  监控数据变化: vm.$watch('监控名称',function(newVal,oldVal){ });
+     *  事件: 在事件中加 e.stopPropagation() 阻止冒泡事件
+     *  vue 可以在标签上加 @click.stop = fn 这样就会阻止冒泡事件
+     *  阻止默认事件: @click.prevent
+     *  键盘事件: @keydown.13="fn" (13表示按下的键盘的) （.right 一般表示鼠标右键 .up 按上键）
+     *  绑定动态数据，就用v-bind 简写 :
+     *  动态绑定class  :class="{back:flag,color:!flag}" back 和 color 是指 class名称 而 flag是判断条件
+     *  动态获取数据 vue-resource 官方推荐叫 axios
+     *  this.$http.post() this.$http.get()
+     *  跨域:this.$http.jsonp(路径，params:{传参},jsonp:'cb').then(function(res){res就是获取到的数据});
+     *  在2。0 中所有的内置过滤器都遗弃了，在2。0中实现自己实现过滤器
+     *  将时间转化为毫秒数就是 Date.now();
+     *  在vue.js2.0中过滤器的写法：
+     *  Vue.filter('date',function(input,param1,param2){})//'date'是指在标签中添加的名字 比如  <div>{{Date.now() | date 'aaa' 'bbb'}}</div>
+     *  //input 是指过滤的内容   aaa，bbb是传的值 在date 后面要加一个空格
+     * 自定义指令:
+     * vuejs1.0
+     * 比如说是 v-border="msg" ，script中写: Vue.directive('border',function(param){
+     *     this.el.style.border = '1px solid '+param;
+     * });
+     * //this.el 就是指v-border所在的元素
+     * //msg 是指data中的数据 data:{mag:'blue'}
+     * 自定义指令可以进行dom 操作
+     * vuejs 2.0
+     * Vue.directive('border',function(el,binding){
+     *   el.style.border = '1px solid '+ binding.value
+     * });
+     * //badding 中包挎传过来的所有参数
+     * 还可以写成这样的 比如 <div v-border>你好</div>
+     * <style type="text/css">
+     *  [v-border]{1px solid blue;} vuejs2.0 不支持
+     * </style>
+     * vue实现托拽:
+     * 借助于自定义主键
+     * div v-drag class="drag"></div>
+     *
+     * Vue.directive('diag',function(el){
+     *      el.onousedown = function(e){
+     *          var disx = e.pageX -el.offsetLeft;
+     *          var disY = e.pageY - el.offsetTop;
+     *          document.onmousemove = function(e){
+     *              el.style.left = e.pagex - disX +'px';
+     *              el.style.top = e.pageY - disY + 'px';
+     *          };
+     *          docment.onmouseup = function(){
+     *              document.onmousemove = docment.onmouseup = null;
+     *          }
+     *          e.preventDefault();
+     *      }
+     * });
+     * 动画效果
+     * vue 1。0
+     * 1、可以和v-show和v-hide 结合 在标签中添加 transition = "fly";
+     * fly是自己定义的
+     *  这样就在style中定义样式
+     *  .fly-transition{
+     *   -webkit-transition:1s linear;
+     *  }
+     *  还定设置一个开始状态和结束状态
+     *  .fly-enter{width:0px;opactity:0;} //开始状态
+     *  .fly-leave{width:100px;opactit:0;}//结束状态
+     *
+     *  2、引用第三方css库：animate.css
+     *  html <div class="animated" transition="fly"></div>
+     *  link 引入animate.css文件
+     *  script :
+     *   transitions:{
+     *      fly:{
+     *          enterClass:'fadeInUp',
+     *          leaveClass:'fadeOutDown'
+     *      }
+     *   }
+     *  vue2.0
+     *
+     * 1、 自定义动画：
+     *   html：
+     *     <transition name="fly">
+     *         <div></div>    //动画盒子,通过给transition 添加 name 名字
+     *     </transition>
+     *  style ：
+     *    //fly-enter 初始化状态设置 fly-enter-active 激活进行时
+     *    //fly-leave 初始化离开状态设置  fly-leave-active 激活离开时
+     *     .fly-enter{} .fly-enter-active {} .fly-leave-active{} //一般设置这三个样式
+     * 2、引用animate.css文件
+     *  <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutLeft">
+     *       <div></div>
+     *  </transition>
+     *
+     */
+</script>
+</html>
