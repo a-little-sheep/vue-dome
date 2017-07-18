@@ -10,6 +10,7 @@
     <script src="./node_modules/vue/dist/vue.min.js"></script>
 </head>
 <body>
+
     <div id="app">
         {{msg}}
     </div>
@@ -126,6 +127,199 @@
      *  <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutLeft">
      *       <div></div>
      *  </transition>
+     * 3、组件  就近维护  （全局组件  局部组件）
+     * 全局组件（在new Vue（{}）之外）
+     *  var et = Vue.extend({
+     *    template:'<h1>hello,welcome to</h1>'
+     *  });
+     *
+     *  简写为:
+     *  Vue.component('hello',{
+     *     template:'<h1>{{msg}},welcome to</h1>',
+     *     data(){
+     *       return {
+     *         msg:'hello'
+     *       }
+     *     }
+     *  });
+     *  html标签 （在id="app"之外也可以引用）
+     * <hello></hello>
+     *
+     *  局部组件：
+     *  new Vue({
+     *      el:'#app',
+     *      components:{
+     *          hello:{
+     *              template:'<h1>hello {{name}}<h1>',
+     *              data(){
+     *                  return {name:'word'}
+     *              }
+     *          }
+     *      }
+     *  })
+     *  <hello></hello> 只能在id=app的div中引用
+     *
+     *
+     *  父子组件
+     *
+     *  创建模版：
+     *  html中:
+     *  <template id="tmpl">
+     *      <!--在父子组件中必须要用一个div包裹起来，不然会报错-->
+     *      <div>
+     *          <div>parent</div>
+     *          <div>{{data}}</div>
+     *          <child :n="name" @s="p"><child>
+     *      </div>
+     *  </template>
+     *  <parent><parent>
+     *
+     *  js中:
+     *   var vn = new Vue({
+     *      el:"#app",
+     *      components:{
+     *          parent:{
+     *              template:'#tmpl',
+     *              data:{
+     *                 return {name:'word'}
+     *              },
+     *              methods:{
+ *                      //当子组件调用s方法时就会调用父组件中的p方法
+     *                  p(data){
+     *                      this.age =data;
+     *                  }
+     *              },
+     *              components:{
+     *                  child:{
+     *                     template:'<div @click="sayAge">child{{n}}</div>'
+     *                     props:['n'] //如果要是校验那么写{n:String}
+     *                     data(){ //实现子传父
+     *                         return {age:18}
+     *                     },
+     *                     methods:{
+     *                          sayAge:{
+     *                              //向上发射事件 $emit
+     *                              this.$emit('s',this.age); //这样就会向组件发射一个s方法
+     *                          }
+     *                     }
+     *                  }
+     *              }
+     *          }
+     *      }
+     *   });
+     *
+     *
+     *
+     * //在子组件是不允许更改父组件中的数据
+     * 在1.0中 方法上添加.sync 这样是可以同步数据的。例如： <child :n.sync="name"><child>
+     * 在2.0中利用的是 对象方法来同步的。例如：
+     *          parent:{
+     *              template:'#tmpl',
+     *              data:{
+     *                 return {name:{name:'word'}}
+     *           },
+     *          当子组件时修改时为
+     *             this.n.name = "...";
+     * 在2。0中子组件修改父组件中传过来的数据时，就会报错 ，解决办法：
+     *
+     *  在子组件中:
+     *  1、data中声明一个变量a
+     *  data(){
+     *     return {a:''}
+     *  }
+     *  2、添加一个mounted
+     *    mounted：function(){
+     *       this.a = this.n
+     *    }
+     *  3、template修改为： template:'<div>{{a}}</div>'
+     *
+     *
+     *  组件中is的特性：
+     *
+     *  <component :is="显示的组件名"></component>
+     *  这个是用来显示不同的组件
+     *
+     *  比如：
+     *
+     *   <div id="app">
+     *      <compontent :is="comp"></component>
+     *      <button @click="comp="hello1">中文</button>
+     *      <button @click="comp="hello">英文</button>
+     *   </div>
+     *   <template id="hello1">你好</tempate>
+     *   <template id="hello">hello</tempate>
+     *   js中
+     *   var vm = new Vue({
+     *       el:"#app",
+     *       data:{
+     *          comp:"hello1"
+     *       },
+     *       components:{
+     *           hello1:{
+     *              template:"#hello1"
+     *           },
+     *           hello:{
+     *              template:"#hello"
+     *           }
+     *       }
+     *
+     *   })
+     *
+     *   slot擦槽
+     *
+     *
+     *   比如说有一个组件是<hello>
+     *   当组件中传值就会把hello组件标签中的内容替换，那么想保留就是定用  slot
+     *   比如：
+     *    <hello>
+     *        <div slot="brand">word</div>
+     *        <div slot="age">8岁</div>
+     *    </hello>
+     *    <template id="hello">
+     *      <div>hello
+     *          <slot name="age"></solt>
+     *          <slot name="brand"></slot>
+     *      </div>
+     *    <template>
+     *    //结果为
+     *     hello 8岁 word
+     *
+     *
+     *
+     *   两个非父子组件的数据传递：
+     *   var Event = new Vue; //event.$on   event.$emit
+     *   var vm = new Vue({
+     *      el:"#app",
+     *      components:{
+     *          hello:{
+     *             template:'#hello',
+     *             data(){
+     *                  return {mag:'我想吃好吃的'}
+     *             },
+     *             emthods:{
+     *                  send(){ // 是在组件 hello 中的点击事件
+     *                      Event.$emit('我饿了',this.mag) //发生事件
+     *                  }
+     *             }
+     *          },
+     *          hello1:{
+     *             mounted(){ //生命周期中的方法
+     *                 Event.$on('我饿了',(data)=>{ //监听 '我饿了事件'
+     *                     this.msg = data;
+     *                 });
+     *             },
+     *              template:'#hello1',
+     *              data(){
+     *                  return {mag:""}
+     *              }
+     *          }
+     *      }
+     *   });
+     *
+     *   这样就会在hello1组件中获取到hello组件中传来的值
+     *
+     *
+     *
      *
      */
 </script>
