@@ -21,6 +21,9 @@
 </template>
 <template id="list">
     <h1>list</h1>
+    <a v-link="{path:'list/news/1'}">消息1</a>
+    <a v-link="{path:'list/news/2'}">消息2</a>
+    <router-view></router-view>
 </template>
 <template id="login">
     <h2>登陆</h2>
@@ -52,6 +55,21 @@
         '/list':{
             component:{
                 template:"#list"
+            },
+            subRoutes:{
+                '/news/:id':{
+                    component:{
+                        template:'<div>消息{{$route.params.id}}</div>',
+                        route:{
+                            data(transition){
+                                console.log(transition); //这个里面包括从哪来，和一些方法
+                                console.log(this.$route.params.id); //这个可以拿到id
+                                console.log(this.$route.path); //这个获取路径
+                                console.log(this.$route.query); //这个获取所有参数
+                            }
+                        }
+                    }
+                }
             }
        }
     });

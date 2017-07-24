@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .router-link-active{background:red;}
+    </style>
+</head>
+<script src="../js/vue2.0.min.js"></script>
+<script src="../js/vue-router2.0.min.js"></script>
+<body>
+    <div id="app">
+        <router-link to="/home">首页</router-link>
+        <router-link to="/list">列表</router-link>
+        <router-view></router-view>
+    </div>
+    <script>
+        var Home = {template:`<div><h1>首页</h1>
+            <router-link to="/home/login">登录</router-link>
+            <router-link to="/home/reg">注册</router-link>
+            <router-view></router-view></div>`};
+        var List = {template:`<div>
+                        <h1>列表</h1>
+                        <router-link to="/list/news/1">消息1</router-link>
+                        <router-link to="/list/news/2">消息2</router-link>
+                        <router-view></router-view>
+                   </div>`};
+        var router = new VueRouter({
+            routes:[
+                {path:'/home',component:Home,children:[
+                    {path:'login',component:{template:'<div>登录</div>'}},
+                    {path:'reg',component:{template:'<div>注册</div>'}}
+                ]},
+                {path:'/list',component:List,children:[
+                    {path:'news/:id',component:{template:"<h2>消息{{$route.params.id}}</h2>"},
+                        beforeEnter(to,from,next){
+                            console.log(to); //这个里面包括方法和参数
+                            console.log(from); // 和to是一样的
+                            next(); // 这个是保持下一步的，如果没有就不往下执行
+                        }
+                    }
+
+                ]},
+                {path:'*',component:Home}
+            ]
+        });
+        var vm = new Vue({
+            router,
+            el:"#app",
+        });
+        /*
+         * 注意在：1、在组件中一定要有一个容器包裹
+         *        2、在vue2。0中 定义子组件用children，而在vue1。0 中 subRoutes
+         *        3、在vue2。0中 定义的子组件中path中前面不要加 "／"
+         *
+         */
+    </script>
+</body>
+</html>
