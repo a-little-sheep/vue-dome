@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="app">
+        <a v-link="{path:'/home'}">首页</a>
+        <a v-link="{path:'/list'}">列表页</a>
+        <router-view></router-view>
+    </div>
+</body>
+<script src="../js/vue1.0.min.js"></script>
+<script src="../js/vue-router.min.js"></script>
+<template id="home">
+    <h1>home</h1>
+    <a v-link="{path:'/home/login'}">登陆</a>
+    <a v-link="{path:'/home/reg'}">注册</a>
+    <router-view></router-view>
+</template>
+<template id="list">
+    <h1>list</h1>
+</template>
+<template id="login">
+    <h2>登陆</h2>
+</template>
+<template id="reg">
+    <h2>注册</h2>
+</template>
+<script>
+    var App = {};
+    var router = new VueRouter;
+    router.map({
+       '/home':{
+           component:{
+               template:"#home"
+           },
+           subRoutes:{
+               '/login':{
+                   component:{
+                        template:"#login"
+                   }
+               },
+               '/reg':{
+                   component:{
+                       template:"#reg"
+                   }
+               }
+           }
+       },
+        '/list':{
+            component:{
+                template:"#list"
+            }
+       }
+    });
+    router.start(App,"#app");
+    //整加404跳转
+    router.redirect({
+        '/':'home'
+    });
+</script>
+</html>
